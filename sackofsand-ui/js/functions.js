@@ -1,4 +1,4 @@
-var map;
+var map, lyr, mil;
 
 $(function() {
 
@@ -6,13 +6,13 @@ $(function() {
 
   var preselectedDate = $("select#select-date").children("option:selected"). val();
   searchTweets(preselectedDate);
+  searchImagery(preselectedDate);
 
   $("select#select-date").change(function(){
     var selectedDate = $(this). children("option:selected"). val();
     searchTweets(selectedDate);
+    searchImagery(selectedDate);
   });
-
-  searchImagery();
 
 });
 
@@ -24,10 +24,7 @@ function searchTweets(date){
     data: {"date" : date},
     dataType: "JSON",
     success : function (data) {
-
-      console.log("success: "+data.items.length)
       addTweetsToMap(data);
-
     }
   });
 
@@ -46,8 +43,6 @@ function addTweetsToMap(data){
       });
     }
   });
-
-  console.log("markers:" + markers.length);
 
   require(
   [
@@ -83,7 +78,9 @@ function addTweetsToMap(data){
       });
     }else{
       if(map.loaded){
-        map.removeLayer(lyr);
+        if(lyr!=undefined){
+          map.removeLayer(lyr);
+        }
         addClusters(markers);
       }else{
         map.on("load", function() {
@@ -181,17 +178,26 @@ function urlify(text) {
     })
 }
 
-function searchImagery(){
-  addImageryToMap();
+function searchImagery(date){
+
+  runningRequest = $.ajax({
+    type: "POST",
+    url : "php/getImagery.php",
+    data: {"date" : date},
+    dataType: "JSON",
+    success : function (data) {
+      addImageryToMap(data);
+    }
+  });
+
 }
 
-function addImageryToMap(){
+function addImageryToMap(data){
 
   require(["esri/map", "esri/layers/MapImageLayer", "esri/layers/MapImage"],
   function(Map, MapImageLayer, MapImage) {
 
     if(map==undefined){
-      console.log("undefined");
       map = new Map("the-map", {
           basemap: "satellite",
           center: [13.63, 47.35], // longitude, latitude
@@ -201,9 +207,10 @@ function addImageryToMap(){
         addImageLayer();
       });
     }else{
-      console.log("defined");
       if(map.loaded){
-        map.removeLayer(mil);
+        if(mil!=undefined){
+          map.removeLayer(mil);
+        }
         addImageLayer();
       }else{
         map.on("load", function() {
@@ -216,8 +223,8 @@ function addImageryToMap(){
       mil = new esri.layers.MapImageLayer();
       map.addLayer(mil);
       var mi = new esri.layers.MapImage({
-        'extent': { 'xmin': 11.5387068634642, 'ymin': 44.997587612457, 'xmax': 12.9993205599376, 'ymax': 46.0243650756893 },
-        'href': 'http://160.40.49.181/SatelliteImages/T32TQR_20180723T101019_TCI_10m.jpg'
+        'extent': { 'xmin': data.xmin, 'ymin': data.ymin, 'xmax': data.xmax, 'ymax': data.ymax },
+        'href': 'data/' + data.filename
       });
       mil.addImage(mi);
     }

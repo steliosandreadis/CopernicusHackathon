@@ -1,11 +1,5 @@
 /* the page */
-/*@font-face {
-  font-family: Comfortaa-Regular;
-  src: local("Comfortaa-Regular"),
-       url(fonts/Comfortaa-Regular.ttf);
-}*/
 html,body{
-	/*font-family: "Comfortaa-Regular";*/
 	font-size: 15px;
 	width: 100%;
 	margin: 0;
@@ -22,11 +16,14 @@ p{
 }
 #the-logo{
   position: absolute;
-  top: 10px;
-  left: 10px;
+  top: 20px;
+  left: 20px;
   z-index: 10;
   color: white;
   font-weight: bold;
+}
+#the-logo img{
+	width: 200px;
 }
 #the-map{
   width: 80vw;
@@ -36,10 +33,31 @@ p{
 }
 #the-dashboard{
   width: 20vw;
-  background: black;
+  background: #5b7294;
   float: right;
+	color: white;
+	padding: 15px;
+	font-weight: bold;
 }
-
+#the-dashboard input[type="checkbox"]{
+	margin-right: 5px;
+	cursor: pointer;
+}
+.button{
+	background: #384659;
+	padding: 10px;
+	text-align: center;
+	margin-bottom: 10px;
+	cursor: pointer;
+}
+.fa{
+	margin-right: 5px;
+}
+.search{
+	font-weight: normal;
+	/*border-bottom: 1px solid white;*/
+	color: #cac5c5;
+}
 
 /* the map */
 .esriSimpleSliderTL {
@@ -48,7 +66,8 @@ p{
     left: unset;
 }
 .mainSection img{
-  width: 100%;
+	max-width: 100%;
+	max-height: 200px;
 }
 .actionsPane{
   display: none;

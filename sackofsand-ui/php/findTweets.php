@@ -14,7 +14,7 @@ $con = new MongoClient("mongodb://localhost:27017", array("username" => $usernam
 $database = "hackathon";
 $db = $con->$database;
 
-$table = "EnglishSnow";
+$table = "recent";
 $collection = $db->$table;
 
 $date = $_POST["date"];
