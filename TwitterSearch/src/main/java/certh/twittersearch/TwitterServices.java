@@ -1,4 +1,4 @@
-package gr.mklab;
+package certh.twittersearch;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -38,7 +38,7 @@ import twitter4j.TwitterFactory;
 import twitter4j.conf.ConfigurationBuilder;
 import twitter4j.json.DataObjectFactory;
 
-import gr.mklab.TwitterPipeline;
+import certh.twittersearch.TwitterPipeline;
 
 
 

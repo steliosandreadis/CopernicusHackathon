@@ -1,4 +1,4 @@
-package gr.mklab;
+package certh.twittersearch;
 
 
 import org.glassfish.grizzly.http.server.HttpServer;

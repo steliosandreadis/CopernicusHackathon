@@ -1,19 +1,12 @@
-package gr.mklab;
-
-
-
+package certh.twittersearch;
 
 import javax.ws.rs.core.MediaType;
-
-
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-
 import javax.ws.rs.QueryParam;
-
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -53,136 +46,113 @@ import twitter4j.TwitterFactory;
 import twitter4j.conf.ConfigurationBuilder;
 import twitter4j.json.DataObjectFactory;
 
-
-
 public class TwitterPipeline {
 
-	MongoDatabase db = null;
-	MongoClient mongoClient = null;
+    MongoDatabase db = null;
+    MongoClient mongoClient = null;
 
-	ConfigurationBuilder cb = new ConfigurationBuilder();
-	Twitter twitter;
-	ArrayList<Status> tweets, records;
-	int count;
+    ConfigurationBuilder cb = new ConfigurationBuilder();
+    Twitter twitter;
+    ArrayList<Status> tweets, records;
+    int count;
 
+    public static String access_token;
+    public static String access_token_secret; 
+    public static String consumer_key; 
+    public static String consumer_key_secret; 
+    public static String dbName;
+    public static String dbCollectionName;
+    public static String dbHost;
+    public static String dbPort;
+    public static String dbUsername;
+    public static String dbPassword;
+    public static String dbAuthMech;
+    public static String locationDetectionService;
 
+    TwitterPipeline() {
 
-	public static String access_token;
-	public static String access_token_secret; 
-	public static String consumer_key; 
-	public static String consumer_key_secret; 
-	public static String dbName;
-	public static String dbCollectionName;
-	public static String dbHost;
-	public static String dbPort;
-	public static String dbUsername;
-	public static String dbPassword;
-	public static String dbAuthMech;
-	public static String locationDetectionService;
+        InputData inputD = loadTextFileWithInputParameters("parametersMongoTwitter.txt");
 
+        locationDetectionService = inputD.getLocationDetectionService();
 
+        access_token = inputD.getAccessToken();
+        access_token_secret = inputD.getAccessTokenSecret();
+        consumer_key = inputD.getConsumerKey();
+        consumer_key_secret = inputD.getConsumerKeySecret();
 
-	TwitterPipeline() {
+        dbName = inputD.getDatabaseName();
+        dbCollectionName = inputD.getCollectionName();
+        dbHost = inputD.getDatabaseHost();
+        dbPort = inputD.getDatabasePort();
+        dbUsername = inputD.getDatabaseUsername();
+        dbPassword = inputD.getDatabasePassword();
+        dbAuthMech = inputD.getDatabaseAuthenticationMechanism();
 
-		InputData inputD = loadTextFileWithInputParameters("parametersMongoTwitter.txt");
-
-		locationDetectionService = inputD.getLocationDetectionService();
-
-		access_token = inputD.getAccessToken();
-		access_token_secret = inputD.getAccessTokenSecret();
-		consumer_key = inputD.getConsumerKey();
-		consumer_key_secret = inputD.getConsumerKeySecret();
-
-		dbName = inputD.getDatabaseName();
-		dbCollectionName = inputD.getCollectionName();
-		dbHost = inputD.getDatabaseHost();
-		dbPort = inputD.getDatabasePort();
-		dbUsername = inputD.getDatabaseUsername();
-		dbPassword = inputD.getDatabasePassword();
-		dbAuthMech = inputD.getDatabaseAuthenticationMechanism();
-
-
-		cb.setJSONStoreEnabled(true);
-		cb.setDebugEnabled(true).setOAuthConsumerKey(consumer_key)
-		.setOAuthConsumerSecret(consumer_key_secret)
-		.setOAuthAccessToken(access_token)
-		.setOAuthAccessTokenSecret(access_token_secret);
-		twitter = new TwitterFactory(cb.build()).getInstance();
-		tweets = new ArrayList<>();
-		records = new ArrayList<>();
-	}
+        cb.setJSONStoreEnabled(true);
+        cb.setDebugEnabled(true).setOAuthConsumerKey(consumer_key)
+        .setOAuthConsumerSecret(consumer_key_secret)
+        .setOAuthAccessToken(access_token)
+        .setOAuthAccessTokenSecret(access_token_secret);
+        twitter = new TwitterFactory(cb.build()).getInstance();
+        tweets = new ArrayList<>();
+        records = new ArrayList<>();
+    }
 
 
-	public String twitterPipeline(String inputQuery) {
+    public String twitterPipeline(String inputQuery) {
 
+        // Getting dates
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+        Date date = new Date();
+        String todate = dateFormat.format(date);
+        Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.DATE, -8);
+        Date todate1 = cal.getTime();    
+        String fromdate = dateFormat.format(todate1);
 
+        // Variables
+        //int numberOfTweets = 1000000;
+        //int queryCount = 100;
+        int numberOfTweets = 110;
+        int queryCount = 10;
+        int count;
 
-		// Getting dates
-		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+        // Getting tweets
+        Query query = new Query(inputQuery);
 
-		Date date = new Date();
-		String todate = dateFormat.format(date);
+        String since = fromdate;
+        query.since(since.substring(0, since.indexOf("T")));
+        String until = todate;
+        query.until(until.substring(0, until.indexOf("T")));
 
-		Calendar cal = Calendar.getInstance();
-		cal.add(Calendar.DATE, -8);
-		Date todate1 = cal.getTime();    
-		String fromdate = dateFormat.format(todate1);
+        long lastID = Long.MAX_VALUE;
 
-		System.out.println(todate);
-		System.out.println(fromdate);
-
-System.out.println(access_token);
-
-		// Variables
-		//int numberOfTweets = 1000000;
-		//int queryCount = 100;
-		int numberOfTweets = 110;
-		int queryCount = 10;
-		int count;
-
-
-
-		// Getting tweets
-		Query query = new Query(inputQuery);
-		
-		String since = fromdate;
-		query.since(since.substring(0, since.indexOf("T"))); //limited to 6-9 days ago
-		String until = todate;
-		query.until(until.substring(0, until.indexOf("T")));
-
-
-		
-		long lastID = Long.MAX_VALUE;
-
-		while (tweets.size() < numberOfTweets) {
-			if (numberOfTweets - tweets.size() > 100)
-				count = queryCount;
-			else
-				count = numberOfTweets - tweets.size();
-			//System.out.println("numberOfTweets="+numberOfTweets+" tweets.size()=" + tweets.size()+" count="+count);
-			query.setCount(count);
-			try {
-				QueryResult result = twitter.search(query);
-				System.out.println("Gathered " + result.getTweets().size() + " tweets");
-				tweets.addAll(result.getTweets());
-				for (Status t : tweets) {
-					if (t.getId() < lastID)
-						lastID = t.getId();
-				}
-				records.addAll(result.getTweets());
-				writeTweets();
-			}catch (TwitterException te) {
-				System.out.println("Rate limit exhausted");
-				try {
-					java.util.concurrent.TimeUnit.MINUTES.sleep(15);
-				} catch (InterruptedException ex) {}
-			}
-			query.setMaxId(lastID - 1);
-		}
+        while (tweets.size() < numberOfTweets) {
+            if (numberOfTweets - tweets.size() > 100)
+                count = queryCount;
+            else
+                count = numberOfTweets - tweets.size();
+            query.setCount(count);
+            try {
+                    QueryResult result = twitter.search(query);
+                    System.out.println("Gathered " + result.getTweets().size() + " tweets");
+                    tweets.addAll(result.getTweets());
+                    for (Status t : tweets) {
+                            if (t.getId() < lastID)
+                                    lastID = t.getId();
+                    }
+                    records.addAll(result.getTweets());
+                    writeTweets();
+            }catch (TwitterException te) {
+                    System.out.println("Error while retrieving tweets: " + te);
+                    try {
+                            java.util.concurrent.TimeUnit.MINUTES.sleep(15);
+                    } catch (InterruptedException ex) {}
+            }
+            query.setMaxId(lastID - 1);
+        }
 		 
-		
-		return "success";
-
+	return "success";
 
 	}
 
@@ -199,6 +169,7 @@ System.out.println(access_token);
 			
 			//Location Detection
 			String id = res.get("id_str").toString();
+                        String tweetText = getText(res);
 			ArrayList<ExtractedLocation> locations = getLocation(res.getString(tweetText), id);
 			JsonArray estimatedLocations = new JsonArray();
 			for(ExtractedLocation location : locations){
@@ -231,7 +202,6 @@ System.out.println(access_token);
 		records.clear();
 
 	}
-
 
 	public static ArrayList<ExtractedLocation> getLocation(String text, String id){
 
@@ -286,9 +256,6 @@ System.out.println(access_token);
 
 	}
 
-
-
-
 	public MongoDatabase connectToDB(String host, String port, String databaseName, String mongoUsername, String mongoPassword, String authenticationUserMechamism){
 
 		if(authenticationUserMechamism == null){
@@ -311,7 +278,6 @@ System.out.println(access_token);
 
 		return db;
 	}
-
 
 	private InputData loadTextFileWithInputParameters(String inputFile){
 
@@ -357,7 +323,6 @@ System.out.println(access_token);
 		return id;
 	}
 
-
 	public ArrayList<String> readFile(String filename) {
 		String thisLine = "";
 		ArrayList<String> wholeFile = new ArrayList<String>();
@@ -383,8 +348,21 @@ System.out.println(access_token);
 	public static void main(String[] args){
 
 		TwitterPipeline tp = new TwitterPipeline();
-		tp.twitterPipeline("flood Venice");
+		tp.twitterPipeline("flood");
 
 	}
 
+        public static String getText(BasicDBObject obj){
+            String text = "";
+            if(obj.containsField("extended_tweet")){
+                BasicDBObject extended_tweet = (BasicDBObject) obj.get("extended_tweet");
+                if(extended_tweet.get("full_text") != null){
+                    text = extended_tweet.get("full_text").toString();
+                }
+            }else if(obj.get("text") != null){
+                text = obj.get("text").toString();
+            }
+            text = text.replaceAll("\r", "").replaceAll("\n", "");
+            return text;
+        }
 }
