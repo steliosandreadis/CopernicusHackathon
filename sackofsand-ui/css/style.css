@@ -1,0 +1,85 @@
+/* the page */
+/*@font-face {
+  font-family: Comfortaa-Regular;
+  src: local("Comfortaa-Regular"),
+       url(fonts/Comfortaa-Regular.ttf);
+}*/
+html,body{
+	/*font-family: "Comfortaa-Regular";*/
+	font-size: 15px;
+	width: 100%;
+	margin: 0;
+  background: #FFFFFF;
+}
+p{
+	word-wrap: break-word;
+	margin: 0;
+}
+#main-container{
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+}
+#the-logo{
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 10;
+  color: white;
+  font-weight: bold;
+}
+#the-map{
+  width: 80vw;
+  float: left;
+  background: black;
+  position: relative;
+}
+#the-dashboard{
+  width: 20vw;
+  background: black;
+  float: right;
+}
+
+
+/* the map */
+.esriSimpleSliderTL {
+    top: 20px;
+    right: 20px;
+    left: unset;
+}
+.mainSection img{
+  width: 100%;
+}
+.actionsPane{
+  display: none;
+}
+.esriPopup .sizer {
+  width: 330px;
+}
+
+/* the dashboard */
+
+
+/* the date picker */
+#the-date-picker{
+  background: #000000ad;
+  position: absolute;
+  width: 80vw;
+  height: 100px;
+  bottom: 0;
+  padding: 0 10vw;
+  z-index: 40;
+}
+select{
+  display: none;
+}
+th.fixedWidth{
+    height: 15px;
+    max-height: 15px;
+    min-height: 15px;
+}
+.fixedWidth h6{
+    color: #fff;
+    text-align: center;
+    font-weight: bold;
+}

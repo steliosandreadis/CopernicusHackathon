@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-type" content="text/html; charset=UTF-8">
+  <link rel="icon" href="">
+  <title>Sack Of Sand</title>
+
+  <!--<link rel="stylesheet" href="components/bootstrap/dist/css/bootstrap.min.css"/>-->
+  <link rel="stylesheet" href="components/bootstrap-datepicker/bootstrap-datepicker.css"/>
+  <link rel="stylesheet" href="components/kendo-ui/styles/kendo.common.min.css"/>
+  <link rel="stylesheet" href="components/kendo-ui/styles/kendo.default.min.css"/>
+  <link rel="stylesheet" href="components/font-awesome-4.7.0/css/font-awesome.css"/>
+  <link rel="stylesheet" href="https://js.arcgis.com/3.28/esri/css/esri.css">
+  <link rel="stylesheet" href="css/style.css"/>
+  <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/themes/smoothness/jquery-ui.css" />
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+  <link rel="stylesheet" type="text/css" href="components/horizontal_selector/css/horizontal_selector.css">
+
+</head>
+<body>
+
+  <main>
+
+    <div id="main-container">
+
+      <div id="the-logo">
+        <p>SACK</p>
+        <p>OF</p>
+        <p>SAND</p>
+      </div>
+
+      <div id="the-map">
+
+      </div>
+
+      <div id="the-dashboard">
+
+      </div>
+
+      <div id="the-date-picker">
+        <select id="select-date" name="select-date">
+          <option value="20-11-2019">20 Nov.</option>
+          <option value="21-11-2019">21 Nov.</option>
+          <option value="22-11-2019">22 Nov.</option>
+          <option value="23-11-2019">23 Nov.</option>
+          <option value="24-11-2019">24 Nov.</option>
+          <option value="25-11-2019">25 Nov.</option>
+          <option value="26-11-2019">26 Nov.</option>
+          <option value="27-11-2019">27 Nov.</option>
+          <option value="28-11-2019">28 Nov.</option>
+          <option value="29-11-2019">29 Nov.</option>
+          <option value="30-11-2019" selected>TODAY</option>
+        </select>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <!--<script src="components/jquery/dist/jquery.min.js"></script>
+  <script src="components/jquery-ui-1.12.1.custom/jquery-ui.js"></script>-->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/jquery-ui.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+  <script src="components/horizontal_selector/js/horizontal_selector.js"></script>
+  <script src="components/kendo-ui/js/kendo.ui.core.min.js"></script>
+  <script src="components/nicescroll/jquery.nicescroll.min.js"></script>
+  <script src="components/bootstrap-datepicker/bootstrap-datepicker.js"></script>
+  <script>
+    var dojoConfig = {
+      parseOnLoad: true,
+      locale:'en',
+      paths: {
+        extras: location.pathname.replace(/\/[^/]+$/, "") + "/components/esri"
+      }
+    };
+  </script>
+  <script src="https://js.arcgis.com/3.28/"></script>
+  <script src="js/functions.js"></script>
+  <script src="js/date.format.js"></script>
+
+  </body>
+  <html>
