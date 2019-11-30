@@ -74,7 +74,7 @@ def downloadProd(prodName, download_filepath):
 		# Write the data in the current directory
 		#filename = os.path.join(downloaded_products_dir, prodName + ".zip")
 		print("Anoigei gia grapsimo:")
-		with open(filename, "w+b") as f:
+		with open(download_filepath, "w+b") as f:
 			f.write(r.content)
 		return 0
   

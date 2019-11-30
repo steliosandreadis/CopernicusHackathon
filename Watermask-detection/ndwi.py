@@ -1,8 +1,13 @@
 import os
-from osgeo import gdal, ogr
+import gdal
 import numpy as np
 import zipfile
 import shutil
+import custom_color_mask
+
+import rasterio
+from rasterio.warp import calculate_default_transform, reproject, Resampling
+
 
 '''
 Uses Sentinel-2 product to create a binary watermask based on MNDWI water index. Threshold was manually set to zero.
@@ -39,6 +44,34 @@ def save_geo_tiff(gdal_guidance_image, output_file, out_format, rasterXSize, ras
 		print("Value to be replaced with NaN was given: "+ str(noDataValue))
 	dst_ds.GetRasterBand(1).WriteArray(array_image) # Save the raster into the output file 
 	dst_ds.FlushCache()	 # Write to disk.
+
+
+def warp2WGS84(in_raster, out_raster):
+
+	dst_crs = 'EPSG:4326'
+
+	with rasterio.open(in_raster) as src:
+		transform, width, height = calculate_default_transform(
+			src.crs, dst_crs, src.width, src.height, *src.bounds)
+		kwargs = src.meta.copy()
+		kwargs.update({
+			'crs': dst_crs,
+			'transform': transform,
+			'width': width,
+			'height': height,
+			"compress": "LZW"
+		})
+
+		with rasterio.open(out_raster, 'w', **kwargs) as dst:
+			for i in range(1, src.count + 1):
+				reproject(
+					source=rasterio.band(src, i),
+					destination=rasterio.band(dst, i),
+					src_transform=src.transform,
+					src_crs=src.crs,
+					dst_transform=transform,
+					dst_crs=dst_crs,
+					resampling=Resampling.nearest)
 	
 
 #input: the path of the input .jp2 file (must be string), the path of the output png file (must be string), the size in pixels of the biggest edge of the output image (must be integer)
@@ -96,10 +129,27 @@ def createS2Watermask(data_temp_dir, input_product, watermask_filename_tif):
 	out_water_png = os.path.splitext(watermask_filename_tif)[0] + '_small.png'	
 
 	#generate the small watermask png file
-	convert_to_png_cmd = 'gdal_translate -of PNG -scale 0 1 0 255 %s %s' % (watermask_filename_tif, out_water_temp_png)		
-	os.system(convert_to_png_cmd)
-	convert_to_png_cmd = 'gdal_translate -of PNG -outsize 1000 -scale %s %s' % (out_water_temp_png, out_water_png)		
-	os.system(convert_to_png_cmd)
+	#convert_to_png_cmd = 'gdal_translate -of PNG -scale 0 1 0 255 %s %s' % (watermask_filename_tif, out_water_temp_png)		
+	#os.system(convert_to_png_cmd)
+		
+	#convert_to_png_cmd = 'gdal_translate -of PNG -outsize 1000 -scale %s %s' % (out_water_temp_png, out_water_png)		
+	#os.system(convert_to_png_cmd)
+	
+	###Warp the image
+	warped_mask_tif = os.path.splitext(watermask_filename_tif)[0] + '_warped.tif'
+	warp2WGS84(watermask_filename_tif, warped_mask_tif)
+	
+	###create transparent png of the warped image
+	custom_color_mask.createTransparentS2Watermask(warped_mask_tif, out_water_png, 1000)
+	
+	###write coordinates and epsg of warped file
+	with rasterio.open(warped_mask_tif) as src:
+		coords_txt_file = os.path.splitext(watermask_filename_tif)[0] + '_warped_crs.txt'
+		file_crs = open(coords_txt_file,"w")
+		file_crs.write("\n")
+		file_crs.write(str(src.crs))
+		file_crs.write(str(src.bounds))
+		file_crs.close()
 
 	#actually just the tci
 	out_water_tci = os.path.splitext(watermask_filename_tif)[0] + '_tci.png'
