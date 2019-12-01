@@ -10,7 +10,7 @@ if($date=="20-11-2019"){
   $item["xmax"] = 3.1351792144248876;
   $item["ymax"] = 49.65272280202541;
 }else if($date=="22-11-2019"){
-  $item["filename"] = "S2A_MSIL1C_20191122T105351_N0208_R051_T31UDQ_20191122T112943_water_bodies_small.png";
+  $item["filename"] = "T31UDQ_20191122T105351_B03_10m_water_bodies_small.png";
   $item["xmin"] = 1.6142723681935194;
   $item["ymin"] = 48.65705300757955;
   $item["xmax"] = 3.1351792144248876;

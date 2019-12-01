@@ -200,8 +200,8 @@ function addImageryToMap(data){
     if(map==undefined){
       map = new Map("the-map", {
           basemap: "satellite",
-          center: [13.63, 47.35], // longitude, latitude
-          zoom: 4
+          center: [2.35, 48.86], // longitude, latitude
+          zoom: 8
       });
       map.on("load", function() {
         addImageLayer();
